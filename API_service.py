@@ -18,6 +18,6 @@ class Coze():
             "role": "user",
             "content": text,
             "content_type": "text"
-        }
+        } #json
         resp = requests.post(' https://api.coze.com/v1/conversation/message/create', headers=headers, params=query, json=message).json()
         return resp
