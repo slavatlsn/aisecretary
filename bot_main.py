@@ -1,5 +1,12 @@
 from cozepy import Coze, TokenAuth, Message, ChatStatus
 from my_token import token
+import os
+from pathlib import Path
+
+coze = Coze(auth=TokenAuth(os.getenv("COZE_API_TOKEN")))
+
+
+file = coze.files.upload(file=Path('/filepath'))
 
 coze = Coze(auth=TokenAuth(token))
 
