@@ -1,9 +1,9 @@
-import os
-from cozepy import COZE_COM_BASE_URL
-from cozepy import AsyncCoze, Coze, TokenAuth
+from cozepy import Coze, TokenAuth, Message, ChatStatus
+from my_token import token
 
-coze_api_token = os.getenv("COZE_API_TOKEN")
-coze_api_base = COZE_COM_BASE_URL
+coze = Coze(auth=TokenAuth(token))
 
-coze = Coze(auth=TokenAuth(token=coze_api_token), base_url=coze_api_base)
-async_coze = AsyncCoze(auth=TokenAuth(token=coze_api_token), base_url=coze_api_base)
+chat_poll = coze.chat.create_and_poll(bot_id='bot_id', user_id='user_id', additional_messages=[Message.build_user_question_text("Sample message")])
+
+for message in chat_poll.messages:
+    print(message.content, end="")
