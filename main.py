@@ -6,53 +6,70 @@ states = dict()
 
 @bot.message_handler(content_types=['text', 'document', 'audio', 'voice'])
 def starting_messages(message):
-    print(states)
+
     print(message)
-    if message.from_user.id in states.keys() and states[message.from_user.id] == 1:
+    # добавление нового пользователя на момент данной сессии
+    if message.from_user.id not in states.keys():
+        states[message.from_user.id] = [0, ""]
+
+    # стартовое сообщение
+    if states[message.from_user.id][0] == 0 or message.text == "/start":
+        if message.text == "/start":
+            bot.send_message(message.from_user.id, "Привет!\nЯ помогаю сократить содержимое файлов и текстовых сообщений")
+            states[message.from_user.id][0] = 1
+        else:
+            bot.send_message(message.from_user.id, "Я тебя не понимаю. Напиши /start")
+
+    # добавление файла (подумать как сказать пользователю, что у него не того формата файл)
+    if states[message.from_user.id][0] == 1:
+        txt = ''
+        f_id = ''
         if message.content_type == 'document':
             f_id = message.document.file_id
         elif message.content_type == 'audio':
             f_id = message.audio.file_id
         elif message.content_type == 'voice':
             f_id = message.voice.file_id
-        elif message.content_type == 'text':
+        elif message.content_type == 'text' and message.text != "/start":
             txt = message.text
-        # загружаем документ и проверяем формат pdf, docx, wav, mp3
-    elif message.text == "/start":
-        bot.send_message(message.from_user.id, "Привет!\nЯ помогаю сократить содержимое файлов и текстовых сообщений")
-        states[message.from_user.id] = 1
-        #добавить кнопочку внизу "закончить загрузку данных"
-        #input_data_type(message)
-    else:
-        bot.send_message(message.from_user.id, "Я тебя не понимаю. Напиши /start")
+
+        if txt != '' or f_id != '':
+            print(txt, f_id)
+            states[message.from_user.id][0] = 2
+        else:
+            bot.send_message(message.from_user.id, "Добавь входные данные в виде текстового или голосового сообщения, или в формате docx, pdf, wav, mp3")
+
+    # спросить в каком формате вывести
+    if states[message.from_user.id][0] == 2:
+        button_doc = types.KeyboardButton(text='docx')
+        button_pdf = types.KeyboardButton(text='pdf')
+        button_txt = types.KeyboardButton(text='Текстовое сообщение')
+        keyboard = types.ReplyKeyboardMarkup(one_time_keyboard=True)
+        button = [button_txt, button_doc, button_pdf]
+        keyboard.add(*button)
+        if message.text in ['docx', 'pdf', 'Текстовое сообщение']:
+            states[message.from_user.id][0] = 3
+        else:
+            bot.send_message(message.from_user.id, "В каком формате вывести выходные данные?", reply_markup=keyboard)
 
 
+    # отправка и получение данных от козы
+    if states[message.from_user.id][0] == 3:
+        telebot.types.ReplyKeyboardRemove()
+        states[message.from_user.id][1] = message.text
+        print(states[message.from_user.id][0], states[message.from_user.id][1], message.from_user.id)
+        #получение данных от нейросети
+        #ожидание ответа
+        #если ответ пришел отправка ответа в нужном формате и
 
-
-def input_data_type(message):
-
-
-    '''
-    keyboard = types.InlineKeyboardMarkup()
-    button_doc = types.InlineKeyboardButton(text='docx', callback_data='doc/docx')
-    button_pdf = types.InlineKeyboardButton(text='pdf', callback_data='pdf')
-    button_txt = types.InlineKeyboardButton(text='Текстовое сообщение', callback_data='txt')
-    #button_mp3 = types.InlineKeyboardButton(text='mp3', callback_data='mp3')
-    #button_wav = types.InlineKeyboardButton(text='wav', callback_data='wav')
-    #button_audio = types.InlineKeyboardButton(text='Голосовое сообщение', callback_data='audio')
-    buttons = [button_doc, button_pdf, button_txt, button_mp3, button_wav, button_audio]
-    keyboard.add(*buttons)
-    bot.send_message(message.from_user.id, "Выберите тип входных данных", reply_markup=keyboard)
-    '''
-
-def uploading_files(message):
-    bot.send_message(message.from_user.id, "Загрузите файлы в порядке обработки данных")
-
-
+        # по нормальному прописать переход к началу цикла, после выгрузки с козы
+        states[message.from_user.id][0] = 1
+'''
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
-    uploading_files(call.data)
-
+    states[call.from_user.id][1] = call.data
+    print(states)
+'''
 
 bot.polling(none_stop=True, interval=0)
 
