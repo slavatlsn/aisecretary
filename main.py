@@ -52,7 +52,6 @@ def starting_messages(message):
         else:
             bot.send_message(message.from_user.id, "В каком формате вывести выходные данные?", reply_markup=keyboard)
 
-
     # отправка и получение данных от козы
     if states[message.from_user.id][0] == 3:
         telebot.types.ReplyKeyboardRemove()
