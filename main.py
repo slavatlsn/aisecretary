@@ -59,6 +59,7 @@ def starting_messages(message):
         button = [button_txt, button_doc, button_pdf]
         keyboard.add(*button)
         if message.text in ['docx', 'pdf', 'Текстовое сообщение']:
+            bot.send_message(message.from_user.id, 'Уже работаю над вашим текстом...')
             states[message.from_user.id][0] = 3
         else:
             bot.send_message(message.from_user.id, "В каком формате вывести выходные данные?", reply_markup=keyboard)
@@ -82,7 +83,7 @@ def starting_messages(message):
             break
         # если ответ пришел отправка ответа в нужном формате и
         if chat_poll.chat.status == ChatStatus.COMPLETED:
-            print(answer)
+            bot.send_message(message.from_user.id, answer)
 
         # по нормальному прописать переход к началу цикла, после выгрузки с козы
         states[message.from_user.id][0] = 1
