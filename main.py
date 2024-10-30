@@ -70,6 +70,9 @@ def starting_messages(message):
         print(states[message.from_user.id][0], states[message.from_user.id][1], message.from_user.id)
         if(states[message.from_user.id][2][:4] == 'f_id'):
             file = bot.download_file(bot.get_file(states[message.from_user.id][2][4:]).file_path)
+            coze.files.upload(file)
+            with open('p.docx', 'wb') as n:
+                n.write(file)
             chat_poll = coze.chat.create_and_poll(bot_id='bot_id', user_id='user_id', additional_messages=[Message.build_user_question_text('Сократи текст из файла и выдай результат в формате' + states[message.from_user.id][1])])
         else:
             chat_poll = coze.chat.create_and_poll(bot_id='bot_id', user_id='user_id', additional_messages=[Message.build_user_question_text('Сократи текст:' + states[message.from_user.id][2] + 'и выдай результат в формате ' + states[message.from_user.id][1])])
