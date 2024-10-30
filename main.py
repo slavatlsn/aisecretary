@@ -76,8 +76,10 @@ def starting_messages(message):
         else:
             chat_poll = coze.chat.create_and_poll(bot_id='bot_id', user_id='user_id', additional_messages=[Message.build_user_question_text('Сократи текст:' + states[message.from_user.id][2] + 'и выдай результат в формате ' + states[message.from_user.id][1])])
         # ожидание ответа
+        answer = ''
         for message2 in chat_poll.messages:
-            print(message2.content, end="")
+            answer = message2.content
+            break
         # если ответ пришел отправка ответа в нужном формате и
         if chat_poll.chat.status == ChatStatus.COMPLETED:
             print('chat finished')
