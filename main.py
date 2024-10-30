@@ -9,9 +9,6 @@ import os
 coze = Coze(auth=TokenAuth(t))
 
 
-for message in chat_poll.messages:
-    print(message.content, end="")
-
 bot = telebot.TeleBot(t)
 states = dict()
 
@@ -71,6 +68,15 @@ def starting_messages(message):
         telebot.types.ReplyKeyboardRemove()
         states[message.from_user.id][1] = message.text
         print(states[message.from_user.id][0], states[message.from_user.id][1], message.from_user.id)
+        if(states[message.from_user.id][2][:4] == 'f_id'):
+            file = bot.download_file(bot.get_file(states[message.from_user.id][2][4:]).file_path)
+            chat_poll = coze.chat.create_and_poll(bot_id='bot_id', user_id='user_id', additional_messages=[Message.build_user_question_text('Сократи текст из файла и выдай результат в формате' + states[message.from_user.id][1])])
+        else:
+            chat_poll = coze.chat.create_and_poll(bot_id='bot_id', user_id='user_id', additional_messages=[Message.build_user_question_text('Сократи текст:' + states[message.from_user.id][2] + 'и выдай результат в формате ' + states[message.from_user.id][1])])
+        for message in chat_poll.messages:
+            print(message.content, end="")
+        if chat_poll.chat.status == ChatStatus.COMPLETED:
+            print('chat finished')
         #получение данных от нейросети
         #ожидание ответа
         #если ответ пришел отправка ответа в нужном формате и
