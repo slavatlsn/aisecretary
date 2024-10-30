@@ -1,7 +1,18 @@
 import telebot
 from telebot import types
+from token import token as t
+from cozepy import Coze, TokenAuth, Message, ChatStatus
+import os
 
-bot = telebot.TeleBot('7973744367:AAExS_wxcfVy74mFYRInAWXa8CWch0G0yJU')
+#file = coze.files.upload(file=Path('/filepath'))
+
+coze = Coze(auth=TokenAuth(t))
+
+
+for message in chat_poll.messages:
+    print(message.content, end="")
+
+bot = telebot.TeleBot(t)
 states = dict()
 
 @bot.message_handler(content_types=['text', 'document', 'audio', 'voice'])
@@ -10,7 +21,7 @@ def starting_messages(message):
     print(message)
     # добавление нового пользователя на момент данной сессии
     if message.from_user.id not in states.keys():
-        states[message.from_user.id] = [0, ""]
+        states[message.from_user.id] = [0, "", ""]
 
     # стартовое сообщение
     if states[message.from_user.id][0] == 0 or message.text == "/start":
@@ -34,12 +45,15 @@ def starting_messages(message):
             txt = message.text
 
         if txt != '' or f_id != '':
+            if f_id != '':
+                states[message.from_user.id][2] = "f_id" + f_id
+            else:
+                states[message.from_user.id][2] = txt
             print(txt, f_id)
             states[message.from_user.id][0] = 2
         else:
             bot.send_message(message.from_user.id, "Добавь входные данные в виде текстового или голосового сообщения, или в формате docx, pdf, wav, mp3")
 
-    # спросить в каком формате вывести
     if states[message.from_user.id][0] == 2:
         button_doc = types.KeyboardButton(text='docx')
         button_pdf = types.KeyboardButton(text='pdf')

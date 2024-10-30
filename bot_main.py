@@ -1,5 +1,4 @@
 from cozepy import Coze, TokenAuth, Message, ChatStatus
-from my_token import token
 import os
 from pathlib import Path
 
