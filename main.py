@@ -82,7 +82,7 @@ def starting_messages(message):
             break
         # если ответ пришел отправка ответа в нужном формате и
         if chat_poll.chat.status == ChatStatus.COMPLETED:
-            print('chat finished')
+            print(answer)
 
         # по нормальному прописать переход к началу цикла, после выгрузки с козы
         states[message.from_user.id][0] = 1
