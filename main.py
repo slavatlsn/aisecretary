@@ -84,6 +84,7 @@ def starting_messages(message):
         # если ответ пришел отправка ответа в нужном формате и
         if chat_poll.chat.status == ChatStatus.COMPLETED:
             bot.send_message(message.from_user.id, answer)
+            bot.send_message(message.from_user.id, 'Если еще надо чем-то помочь пиши /start')
 
         # по нормальному прописать переход к началу цикла, после выгрузки с козы
         states[message.from_user.id][0] = 1
