@@ -1,12 +1,12 @@
 import telebot
 from telebot import types
-from token import token as t
+from my_tokens import tg_token as t, coze_token as c
 from cozepy import Coze, TokenAuth, Message, ChatStatus
 import os
 
 #file = coze.files.upload(file=Path('/filepath'))
 
-coze = Coze(auth=TokenAuth(t))
+coze = Coze(auth=TokenAuth(c))
 
 
 bot = telebot.TeleBot(t)
