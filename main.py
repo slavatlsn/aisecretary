@@ -73,13 +73,12 @@ def starting_messages(message):
             chat_poll = coze.chat.create_and_poll(bot_id='bot_id', user_id='user_id', additional_messages=[Message.build_user_question_text('Сократи текст из файла и выдай результат в формате' + states[message.from_user.id][1])])
         else:
             chat_poll = coze.chat.create_and_poll(bot_id='bot_id', user_id='user_id', additional_messages=[Message.build_user_question_text('Сократи текст:' + states[message.from_user.id][2] + 'и выдай результат в формате ' + states[message.from_user.id][1])])
-        for message in chat_poll.messages:
-            print(message.content, end="")
+        # ожидание ответа
+        for message2 in chat_poll.messages:
+            print(message2.content, end="")
+        # если ответ пришел отправка ответа в нужном формате и
         if chat_poll.chat.status == ChatStatus.COMPLETED:
             print('chat finished')
-        #получение данных от нейросети
-        #ожидание ответа
-        #если ответ пришел отправка ответа в нужном формате и
 
         # по нормальному прописать переход к началу цикла, после выгрузки с козы
         states[message.from_user.id][0] = 1
