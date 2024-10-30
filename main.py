@@ -69,6 +69,7 @@ def starting_messages(message):
         states[message.from_user.id][1] = message.text
         print(states[message.from_user.id][0], states[message.from_user.id][1], message.from_user.id)
         if(states[message.from_user.id][2][:4] == 'f_id'):
+            ####сделать распознавание расширения
             file = bot.download_file(bot.get_file(states[message.from_user.id][2][4:]).file_path)
             coze.files.upload(file)
             with open('p.docx', 'wb') as n:
