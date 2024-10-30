@@ -72,9 +72,9 @@ def starting_messages(message):
             ####сделать распознавание расширения
             file = bot.download_file(bot.get_file(states[message.from_user.id][2][4:]).file_path)
             f = coze.files.upload(file)
-            chat_poll = coze.chat.create_and_poll(bot_id='bot_id', user_id='user_id', additional_messages=[Message.build_user_question_text('Сократи текст из файла и выдай результат в формате' + states[message.from_user.id][1]), Message.build_user_question_objects(MessageObjectString.build_file(file.id))])
+            chat_poll = coze.chat.create_and_poll(bot_id='7422700799514099718', user_id='0', additional_messages=[Message.build_user_question_text('Сократи текст из файла и выдай результат в формате' + states[message.from_user.id][1]), Message.build_user_question_objects(MessageObjectString.build_file(file.id))])
         else:
-            chat_poll = coze.chat.create_and_poll(bot_id='bot_id', user_id='user_id', additional_messages=[Message.build_user_question_text('Сократи текст:' + states[message.from_user.id][2] + 'и выдай результат в формате ' + states[message.from_user.id][1])])
+            chat_poll = coze.chat.create_and_poll(bot_id='7422700799514099718', user_id='0', additional_messages=[Message.build_user_question_text('Сократи текст:' + states[message.from_user.id][2] + 'и выдай результат в формате ' + states[message.from_user.id][1])])
         # ожидание ответа
         answer = ''
         for message2 in chat_poll.messages:
