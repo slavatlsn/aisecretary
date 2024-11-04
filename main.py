@@ -1,20 +1,13 @@
 import telebot
 from telebot import types
-from my_tokens import tg_token as t, coze_token as c
-from cozepy import Coze, TokenAuth, Message, ChatStatus
-import os
-
-#file = coze.files.upload(file=Path('/filepath'))
-
-coze = Coze(auth=TokenAuth(c))
-
+from my_tokens import tg_token as t
 
 bot = telebot.TeleBot(t)
 states = dict()
 
+
 @bot.message_handler(content_types=['text', 'document', 'audio', 'voice'])
 def starting_messages(message):
-
     print(message)
     # добавление нового пользователя на момент данной сессии
     if message.from_user.id not in states.keys():
@@ -42,12 +35,20 @@ def starting_messages(message):
             txt = message.text
 
         if txt != '' or f_id != '':
+            f = True
             if f_id != '':
-                states[message.from_user.id][2] = "f_id" + f_id
+                f_obj = bot.get_file(f_id)
+                ext = f_obj.file_path[f_obj.file_path.find('.') + 1:]
+                if ext in {'docx', 'pdf', 'oga', 'mp3', 'wav'}:
+                    states[message.from_user.id][2] = "f_pt" + f_obj.file_path
+                else:
+                    f = False
+                    bot.send_message(message.from_user.id, "Добавь входные данные в виде текстового или голосового сообщения, или в формате docx, pdf, wav, mp3")
             else:
                 states[message.from_user.id][2] = txt
-            print(txt, f_id)
-            states[message.from_user.id][0] = 2
+            if f:
+                print(txt, f_id)
+                states[message.from_user.id][0] = 2
         else:
             bot.send_message(message.from_user.id, "Добавь входные данные в виде текстового или голосового сообщения, или в формате docx, pdf, wav, mp3")
 
@@ -69,35 +70,17 @@ def starting_messages(message):
         telebot.types.ReplyKeyboardRemove()
         states[message.from_user.id][1] = message.text
         print(states[message.from_user.id][0], states[message.from_user.id][1], message.from_user.id)
-        if(states[message.from_user.id][2][:4] == 'f_id'):
-            ####сделать распознавание расширения
-            file = bot.download_file(bot.get_file(states[message.from_user.id][2][4:]).file_path)
-            f = coze.files.upload(file)
-            chat_poll = coze.chat.create_and_poll(bot_id='7422700799514099718', user_id='0', additional_messages=[Message.build_user_question_text('Сократи текст из файла и выдай результат в формате' + states[message.from_user.id][1]), Message.build_user_question_objects(MessageObjectString.build_file(file.id))])
+        if (states[message.from_user.id][2][:4] == 'f_pt'):
+            s = states[message.from_user.id][2]
+            ext = s[s.find('.') + 1:]
+            print(ext)
+            file = bot.download_file(states[message.from_user.id][2][4:])
+            print('send file to ai')
         else:
-            chat_poll = coze.chat.create_and_poll(bot_id='7422700799514099718', user_id='0', additional_messages=[Message.build_user_question_text('Сократи текст:' + states[message.from_user.id][2] + 'и выдай результат в формате ' + states[message.from_user.id][1])])
-        # ожидание ответа
-        answer = ''
-        for message2 in chat_poll.messages:
-            answer = message2.content
-            break
-        # если ответ пришел отправка ответа в нужном формате и
-        if chat_poll.chat.status == ChatStatus.COMPLETED:
-            bot.send_message(message.from_user.id, answer)
-            bot.send_message(message.from_user.id, 'Если еще надо чем-то помочь пиши /start')
-
-        # по нормальному прописать переход к началу цикла, после выгрузки с козы
+            print('send text to ai')
+        #получение ответа от нейросети
+        bot.send_message(message.from_user.id, 'Если еще надо чем-то помочь загрузи входные данные')
         states[message.from_user.id][0] = 1
-'''
-@bot.callback_query_handler(func=lambda call: True)
-def callback_worker(call):
-    states[call.from_user.id][1] = call.data
-    print(states)
-'''
+
 
 bot.polling(none_stop=True, interval=0)
-
-
-
-
-
