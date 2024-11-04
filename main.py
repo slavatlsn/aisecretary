@@ -6,7 +6,7 @@ bot = telebot.TeleBot(t)
 states = dict()
 
 
-@bot.message_handler(content_types=['text', 'document', 'audio', 'voice'])
+@bot.message_handler(content_types=['text', 'document', 'audio', 'voice', 'photo'])
 def starting_messages(message):
     print(message)
     # добавление нового пользователя на момент данной сессии
@@ -15,13 +15,13 @@ def starting_messages(message):
 
     # стартовое сообщение
     if states[message.from_user.id][0] == 0 or message.text == "/start":
-        if message.text == "/start":
+        if message.text == "/start" and states[message.from_user.id][0] == 0:
             bot.send_message(message.from_user.id, "Привет!\nЯ помогаю сократить содержимое файлов и текстовых сообщений")
             states[message.from_user.id][0] = 1
-        else:
+        elif(states[message.from_user.id][0] < 1):
             bot.send_message(message.from_user.id, "Я тебя не понимаю. Напиши /start")
 
-    # добавление файла (подумать как сказать пользователю, что у него не того формата файл)
+    # добавление файла
     if states[message.from_user.id][0] == 1:
         txt = ''
         f_id = ''
@@ -31,6 +31,8 @@ def starting_messages(message):
             f_id = message.audio.file_id
         elif message.content_type == 'voice':
             f_id = message.voice.file_id
+        elif message.content_type == 'photo':
+            f_id = message.photo[-1].file_id
         elif message.content_type == 'text' and message.text != "/start":
             txt = message.text
 
@@ -39,7 +41,7 @@ def starting_messages(message):
             if f_id != '':
                 f_obj = bot.get_file(f_id)
                 ext = f_obj.file_path[f_obj.file_path.find('.') + 1:]
-                if ext in {'docx', 'pdf', 'oga', 'mp3', 'wav'}:
+                if ext in {'docx', 'pdf', 'oga', 'mp3', 'wav', 'jpg', 'png'}:
                     states[message.from_user.id][2] = "f_pt" + f_obj.file_path
                 else:
                     f = False
@@ -75,6 +77,9 @@ def starting_messages(message):
             ext = s[s.find('.') + 1:]
             print(ext)
             file = bot.download_file(states[message.from_user.id][2][4:])
+            with open(str(message.from_user.id) + '.' + ext, 'wb') as new:
+                new.write(file)
+            new.close()
             print('send file to ai')
         else:
             print('send text to ai')
