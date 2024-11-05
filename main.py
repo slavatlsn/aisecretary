@@ -1,8 +1,10 @@
 import telebot
 from telebot import types
-from my_tokens import tg_token as t
+from my_tokens import tg_token as t, coze_token as c
+from cozepy import Coze, TokenAuth, Message, ChatStatus, MessageObjectString
 
 bot = telebot.TeleBot(t)
+coze = Coze(auth=TokenAuth(c))
 states = dict()
 
 
@@ -77,15 +79,29 @@ def starting_messages(message):
             ext = s[s.find('.') + 1:]
             print(ext)
             file = bot.download_file(states[message.from_user.id][2][4:])
-            with open(str(message.from_user.id) + '.' + ext, 'wb') as new:
+            f_name = str(message.from_user.id) + '.' + ext
+            with open(f_name, 'wb') as new:
                 new.write(file)
             new.close()
-            print('send file to ai')
+            if(ext in {'pdf', 'jpg', 'png'}):
+                f = coze.files.upload(file)
+                chat_poll = coze.chat.create_and_poll(bot_id='7433847972913643525', user_id='0', additional_messages=[Message.build_user_question_objects([MessageObjectString.build_file(f.id)])])
+            else:
+                chat_poll = []
         else:
             print('send text to ai')
-        #получение ответа от нейросети
-        bot.send_message(message.from_user.id, 'Если еще надо чем-то помочь загрузи входные данные')
-        states[message.from_user.id][0] = 1
+            chat_poll = coze.chat.create_and_poll(bot_id='7433847972913643525', user_id='0', additional_messages=[Message.build_user_question_text('Сократи текст: ' + states[message.from_user.id][2])])
+        answer = []
+        for message2 in chat_poll.messages:
+            answer.append(message2.content)
+        # если ответ пришел отправка ответа в нужном формате и
+        if chat_poll.chat.status == ChatStatus.COMPLETED:
+            bot.send_message(message.from_user.id, str(answer))
+            #получение ответа от нейросети
+            bot.send_message(message.from_user.id, 'Если еще надо чем-то помочь загрузи входные данные')
+            states[message.from_user.id][0] = 1
+        else:
+            bot.send_message(message.from_user.id, 'Что-то пошло не так, мы уже решаем эту проблему')
 
 
 bot.polling(none_stop=True, interval=0)
