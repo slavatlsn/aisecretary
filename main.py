@@ -10,21 +10,21 @@ from docx2pdf import convert
 bot = telebot.TeleBot(t)
 coze = Coze(auth=TokenAuth(c))
 states = dict()
-# 笑话
+
 
 @bot.message_handler(content_types=['text', 'document', 'audio', 'voice', 'photo'])
 def starting_messages(message):
     print(message)
     # добавление нового пользователя на момент данной сессии
     if message.from_user.id not in states.keys():
-        states[message.from_user.id] = [0, "", "", False] # шаг,
+        states[message.from_user.id] = [0, "", "", False] # шаг, тип выходных, расширение? , флаг для 2 шага
 
     # стартовое сообщение
     if states[message.from_user.id][0] == 0 or message.text == "/start":
         if message.text == "/start" and states[message.from_user.id][0] == 0:
             bot.send_message(message.from_user.id, "Привет!\nЯ помогаю сократить содержимое файлов и текстовых сообщений")
             states[message.from_user.id][0] = 1
-        elif (states[message.from_user.id][0] < 1):
+        elif states[message.from_user.id][0] < 1:
             bot.send_message(message.from_user.id, "Я тебя не понимаю. Напиши /start")
 
     # добавление файла
@@ -68,14 +68,12 @@ def starting_messages(message):
         button = [button_txt, button_doc, button_pdf]
         keyboard.add(*button)
         if message.text in ['docx', 'pdf', 'Текстовое сообщение'] and states[message.from_user.id][3]:
-            states[message.from_user.id][1] = message.text
             bot.send_message(message.from_user.id, 'Уже работаю над вашим текстом...')
             states[message.from_user.id][0] = 3
             states[message.from_user.id][3] = False
         else:
             states[message.from_user.id][3] = True
             bot.send_message(message.from_user.id, "В каком формате вывести выходные данные?", reply_markup=keyboard)
-
 
     # отправка и получение данных от козы
     if states[message.from_user.id][0] == 3:
@@ -104,6 +102,7 @@ def starting_messages(message):
         answer = []
         for message2 in chat_poll.messages:
             answer.append(message2.content)
+
         # если ответ пришел отправка ответа в нужном формате и
         if chat_poll.chat.status == ChatStatus.COMPLETED:
             remove_files = []
