@@ -2,7 +2,10 @@ import telebot
 from telebot import types
 from my_tokens import tg_token as t, coze_token as c
 from cozepy import Coze, TokenAuth, Message, ChatStatus, MessageObjectString
-from docx import *
+from docx import Document
+from os import remove
+from docx2pdf import convert
+
 
 bot = telebot.TeleBot(t)
 coze = Coze(auth=TokenAuth(c))
@@ -76,6 +79,7 @@ def starting_messages(message):
 
     # отправка и получение данных от козы
     if states[message.from_user.id][0] == 3:
+        '''
         telebot.types.ReplyKeyboardRemove()
         states[message.from_user.id][1] = message.text
         print(states[message.from_user.id][0], states[message.from_user.id][1], message.from_user.id)
@@ -96,20 +100,41 @@ def starting_messages(message):
         else:
             print('send text to ai')
             chat_poll = coze.chat.create_and_poll(bot_id='7433847972913643525', user_id='0', additional_messages=[Message.build_user_question_text('Сократи текст: ' + states[message.from_user.id][2])])
-        answer = []
-        for message2 in chat_poll.messages:
-            answer.append(message2.content)
+        '''
+        answer = ["тыгыssssдык"]
+        #for message2 in chat_poll.messages:
+        #    answer.append(message2.content)
+        flag = True
         # если ответ пришел отправка ответа в нужном формате и
-        if chat_poll.chat.status == ChatStatus.COMPLETED:
+        if '''chat_poll.chat.status == ChatStatus.COMPLETED''' or flag:
+
             if states[message.from_user.id][1] == "Текстовое сообщение":
-                bot.send_message(message.from_user.id, str(answer))
+                bot.send_message(message.from_user.id, str(*answer))
+
             if states[message.from_user.id][1] == "pdf":
+                document = Document()
+                document.add_paragraph(str(*answer))
+                document.add_page_break()
+                document_name = f'docx_data/docx{message.from_user.id}.docx'
+                document_name1 = f'pdf_data/pdf{message.from_user.id}.pdf'
+                document.save(document_name)
+                convert(document_name, document_name1)
+                with open(document_name1, 'rb') as file:
+                    bot.send_document(message.chat.id, file)
+                bot.send_document(message.from_user.id, file)
+                #remove(document_name)
+                #remove(document_name1)
 
             if states[message.from_user.id][1] == "docx":
                 document = Document()
-                document.add_paragraph('dpofkpofk')
+                document.add_paragraph(str(*answer))
                 document.add_page_break()
-                bot.send_message(message.from_user.id, str(answer))
+                document_name = f'docx_data/docx{message.from_user.id}.docx'
+                document.save(document_name)
+                with open(document_name, 'rb') as file:
+                    bot.send_document(message.chat.id, file)
+                bot.send_document(message.from_user.id, file)
+                #remove(document_name)
             #получение ответа от нейросети
             bot.send_message(message.from_user.id, 'Если еще надо чем-то помочь загрузи входные данные')
             states[message.from_user.id][0] = 1
