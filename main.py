@@ -79,7 +79,7 @@ def starting_messages(message):
 
     # отправка и получение данных от козы
     if states[message.from_user.id][0] == 3:
-        '''
+
         telebot.types.ReplyKeyboardRemove()
         states[message.from_user.id][1] = message.text
         print(states[message.from_user.id][0], states[message.from_user.id][1], message.from_user.id)
@@ -100,14 +100,13 @@ def starting_messages(message):
         else:
             print('send text to ai')
             chat_poll = coze.chat.create_and_poll(bot_id='7433847972913643525', user_id='0', additional_messages=[Message.build_user_question_text('Сократи текст: ' + states[message.from_user.id][2])])
-        '''
-        answer = ["тыгыssssдык"]
-        #for message2 in chat_poll.messages:
-        #    answer.append(message2.content)
-        flag = True
-        # если ответ пришел отправка ответа в нужном формате и
-        if '''chat_poll.chat.status == ChatStatus.COMPLETED''' or flag:
 
+        answer = []
+        for message2 in chat_poll.messages:
+            answer.append(message2.content)
+        # если ответ пришел отправка ответа в нужном формате и
+        if chat_poll.chat.status == ChatStatus.COMPLETED:
+            remove_files = []
             if states[message.from_user.id][1] == "Текстовое сообщение":
                 bot.send_message(message.from_user.id, str(*answer))
 
@@ -119,11 +118,10 @@ def starting_messages(message):
                 document_name1 = f'pdf_data/pdf{message.from_user.id}.pdf'
                 document.save(document_name)
                 convert(document_name, document_name1)
-                with open(document_name1, 'rb') as file:
-                    bot.send_document(message.chat.id, file)
+                file = open(document_name1, 'rb')
                 bot.send_document(message.from_user.id, file)
-                #remove(document_name)
-                #remove(document_name1)
+                file.close()
+                remove_files = [document_name, document_name1]
 
             if states[message.from_user.id][1] == "docx":
                 document = Document()
@@ -131,12 +129,15 @@ def starting_messages(message):
                 document.add_page_break()
                 document_name = f'docx_data/docx{message.from_user.id}.docx'
                 document.save(document_name)
-                with open(document_name, 'rb') as file:
-                    bot.send_document(message.chat.id, file)
+                file = open(document_name, 'rb')
                 bot.send_document(message.from_user.id, file)
-                #remove(document_name)
+                file.close()
+                remove_files = [document_name]
+
             #получение ответа от нейросети
             bot.send_message(message.from_user.id, 'Если еще надо чем-то помочь загрузи входные данные')
+            for remove_file in remove_files:
+                remove(remove_file)
             states[message.from_user.id][0] = 1
         else:
             bot.send_message(message.from_user.id, 'Что-то пошло не так, мы уже решаем эту проблему')
