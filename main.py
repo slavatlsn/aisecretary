@@ -142,11 +142,11 @@ def starting_messages(message):
         if chat_poll.chat.status == ChatStatus.COMPLETED:
             remove_files = []
             if states[message.from_user.id][1] == "Текстовое сообщение":
-                bot.send_message(message.from_user.id, str(answer[0]))
+                bot.send_message(message.from_user.id, str(answer[0 if states[message.from_user.id][2][:4] != 'f_pt' else 1]))
 
             if states[message.from_user.id][1] == "pdf":
                 document = Document()
-                document.add_paragraph(str(answer[0]))
+                document.add_paragraph(str(answer[0 if states[message.from_user.id][2][:4] != 'f_pt' else 1]))
                 document.add_page_break()
                 document_name = f'docx_data/docx{message.from_user.id}.docx'
                 document_name1 = f'pdf_data/pdf{message.from_user.id}.pdf'
@@ -159,7 +159,7 @@ def starting_messages(message):
 
             if states[message.from_user.id][1] == "docx":
                 document = Document()
-                document.add_paragraph(str(answer))
+                document.add_paragraph(str(answer[0 if states[message.from_user.id][2][:4] != 'f_pt' else 1]))
                 document.add_page_break()
                 document_name = f'docx_data/docx{message.from_user.id}.docx'
                 document.save(document_name)
