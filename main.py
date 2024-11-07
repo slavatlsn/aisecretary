@@ -8,7 +8,6 @@ from docx2pdf import convert
 from speech_recognition import Recognizer, WavFile
 from audio_extract import extract_audio
 from pypdf import PdfReader
-import json
 
 
 bot = telebot.TeleBot(t)
@@ -138,23 +137,16 @@ def starting_messages(message):
         answer = []
         for message2 in chat_poll.messages:
             answer.append(message2.content)
-
         print(answer)
         # если ответ пришел отправка ответа в нужном формате и
         if chat_poll.chat.status == ChatStatus.COMPLETED:
             remove_files = []
-            if states[message.from_user.id][2][:4] != 'f_pt':
-                data = str(answer[0])
-            else:
-                a = json.loads(answer[1])['data']['results'][0]['words']
-                print(a)
-                data = ' '.join([el['text'] for el in a])
             if states[message.from_user.id][1] == "Текстовое сообщение":
-                bot.send_message(message.from_user.id, data)
+                bot.send_message(message.from_user.id, str(answer[0]))
 
             if states[message.from_user.id][1] == "pdf":
                 document = Document()
-                document.add_paragraph(data)
+                document.add_paragraph(str(answer[0]))
                 document.add_page_break()
                 document_name = f'docx_data/docx{message.from_user.id}.docx'
                 document_name1 = f'pdf_data/pdf{message.from_user.id}.pdf'
@@ -167,7 +159,7 @@ def starting_messages(message):
 
             if states[message.from_user.id][1] == "docx":
                 document = Document()
-                document.add_paragraph(data)
+                document.add_paragraph(str(answer))
                 document.add_page_break()
                 document_name = f'docx_data/docx{message.from_user.id}.docx'
                 document.save(document_name)
