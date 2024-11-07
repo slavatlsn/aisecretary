@@ -102,8 +102,9 @@ def starting_messages(message):
             elif(ext == 'pdf'):
                 reader = PdfReader(f_name)
                 kol_pages = len(reader.pages)
+                states[message.from_user.id][2] = ''
                 for i in range(0, kol_pages):
-                    page = reader.pages[0]
+                    page = reader.pages[i]
                     text = page.extract_text()
                     states[message.from_user.id][2] += '\n' + text
                 #текст в pdf
@@ -149,11 +150,11 @@ def starting_messages(message):
                 data = ' '.join([el['text'] for el in a])
 
             if states[message.from_user.id][1] == "Текстовое сообщение":
-                bot.send_message(message.from_user.id, str(answer[0]))
+                bot.send_message(message.from_user.id, data)
 
             if states[message.from_user.id][1] == "pdf":
                 document = Document()
-                document.add_paragraph(str(answer[0]))
+                document.add_paragraph(data)
                 document.add_page_break()
                 document_name = f'docx_data/docx{message.from_user.id}.docx'
                 document_name1 = f'pdf_data/pdf{message.from_user.id}.pdf'
@@ -166,7 +167,7 @@ def starting_messages(message):
 
             if states[message.from_user.id][1] == "docx":
                 document = Document()
-                document.add_paragraph(str(answer))
+                document.add_paragraph(data)
                 document.add_page_break()
                 document_name = f'docx_data/docx{message.from_user.id}.docx'
                 document.save(document_name)
