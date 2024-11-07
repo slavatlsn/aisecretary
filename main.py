@@ -5,11 +5,15 @@ from cozepy import Coze, TokenAuth, Message, ChatStatus, MessageObjectString
 from docx import Document
 from os import remove
 from docx2pdf import convert
+from speech_recognition import Recognizer, WavFile
+from audio_extract import extract_audio
 
 
 bot = telebot.TeleBot(t)
 coze = Coze(auth=TokenAuth(c))
 states = dict()
+r = Recognizer()
+
 
 
 @bot.message_handler(content_types=['text', 'document', 'audio', 'voice', 'photo'])
@@ -83,19 +87,41 @@ def starting_messages(message):
         print(states[message.from_user.id][0], states[message.from_user.id][1], message.from_user.id)
         if (states[message.from_user.id][2][:4] == 'f_pt'):
             s = states[message.from_user.id][2]
-            ext = s[s.find('.') + 1:]
+            ext = s[s.rfind('.') + 1:]
             print(ext)
             file = bot.download_file(states[message.from_user.id][2][4:])
             f_name = str(message.from_user.id) + '.' + ext
             with open(f_name, 'wb') as new:
                 new.write(file)
             new.close()
-            if(ext in {'pdf', 'jpg', 'png'}):
+            if(ext in {'jpg', 'png'}):
                 f = coze.files.upload(file)
                 chat_poll = coze.chat.create_and_poll(bot_id='7433847972913643525', user_id='0', additional_messages=[Message.build_user_question_objects([MessageObjectString.build_file(f.id)])])
+            elif(ext == 'pdf'):
+                pass
+                #текст в pdf
+            elif (ext == 'docx'):
+                doc = Document(f_name)
+                fullText = []
+                for para in doc.paragraphs:
+                    fullText.append(para.text)
+                states[message.from_user.id][2] = '\n'.join(fullText)
+                # текст в docx
+            elif ext in {'oga', 'mp3', 'wav'}:
+                f_name_new = str(message.from_user.id) + '.wav'
+                print(f_name_new)
+                if ext != 'wav':
+                    extract_audio(input_path=f_name, output_path=f_name_new, output_format='wav')
+                sample = WavFile(f_name_new)
+                with sample as audio:
+                    audio = r.record(audio)
+                states[message.from_user.id][2] = r.recognize_google(audio, language='ru-Ru')
+                remove(f_name_new)
+                print(states[message.from_user.id][2])
+                #Speech recognition
             else:
                 chat_poll = []
-        else:
+        if (states[message.from_user.id][2][:4] != 'f_pt'):
             print('send text to ai')
             chat_poll = coze.chat.create_and_poll(bot_id='7433847972913643525', user_id='0', additional_messages=[Message.build_user_question_text('Сократи текст: ' + states[message.from_user.id][2])])
 
