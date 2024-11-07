@@ -8,7 +8,7 @@ from docx2pdf import convert
 from speech_recognition import Recognizer, WavFile
 from audio_extract import extract_audio
 from pypdf import PdfReader
-
+import json
 
 bot = telebot.TeleBot(t)
 coze = Coze(auth=TokenAuth(c))
@@ -141,6 +141,13 @@ def starting_messages(message):
         # если ответ пришел отправка ответа в нужном формате и
         if chat_poll.chat.status == ChatStatus.COMPLETED:
             remove_files = []
+            if states[message.from_user.id][2][:4] != 'f_pt':
+                data = str(answer[0])
+            else:
+                a = json.loads(answer[1])['data']['results'][0]['words']
+                print(a)
+                data = ' '.join([el['text'] for el in a])
+
             if states[message.from_user.id][1] == "Текстовое сообщение":
                 bot.send_message(message.from_user.id, str(answer[0]))
 
