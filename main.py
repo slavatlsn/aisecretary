@@ -98,7 +98,7 @@ def starting_messages(message):
             new.close()
             if(ext in {'jpg', 'png'}):
                 f = coze.files.upload(file)
-                chat_poll = coze.chat.create_and_poll(bot_id='7433847972913643525', user_id='0', additional_messages=[Message.build_user_question_objects([MessageObjectString.build_file(f.id)])])
+                chat_poll = coze.chat.create_and_poll(bot_id='7434590500508418104', user_id='0', additional_messages=[Message.build_user_question_objects([MessageObjectString.build_file(f.id)])])
             elif(ext == 'pdf'):
                 reader = PdfReader(f_name)
                 kol_pages = len(reader.pages)
@@ -132,21 +132,21 @@ def starting_messages(message):
 
         if (states[message.from_user.id][2][:4] != 'f_pt'):
             print('send text to ai')
-            chat_poll = coze.chat.create_and_poll(bot_id='7433847972913643525', user_id='0', additional_messages=[Message.build_user_question_text('Сократи текст: ' + states[message.from_user.id][2])])
+            chat_poll = coze.chat.create_and_poll(bot_id='7434590500508418104', user_id='0', additional_messages=[Message.build_user_question_text('Сократи текст: ' + states[message.from_user.id][2])])
 
         answer = []
         for message2 in chat_poll.messages:
             answer.append(message2.content)
-
+        print(answer)
         # если ответ пришел отправка ответа в нужном формате и
         if chat_poll.chat.status == ChatStatus.COMPLETED:
             remove_files = []
             if states[message.from_user.id][1] == "Текстовое сообщение":
-                bot.send_message(message.from_user.id, str(*answer))
+                bot.send_message(message.from_user.id, str(answer[0]))
 
             if states[message.from_user.id][1] == "pdf":
                 document = Document()
-                document.add_paragraph(str(*answer))
+                document.add_paragraph(str(answer[0]))
                 document.add_page_break()
                 document_name = f'docx_data/docx{message.from_user.id}.docx'
                 document_name1 = f'pdf_data/pdf{message.from_user.id}.pdf'
@@ -159,7 +159,7 @@ def starting_messages(message):
 
             if states[message.from_user.id][1] == "docx":
                 document = Document()
-                document.add_paragraph(str(*answer))
+                document.add_paragraph(str(answer))
                 document.add_page_break()
                 document_name = f'docx_data/docx{message.from_user.id}.docx'
                 document.save(document_name)

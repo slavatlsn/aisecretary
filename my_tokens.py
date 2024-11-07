@@ -1,2 +1,2 @@
 tg_token = '7973744367:AAExS_wxcfVy74mFYRInAWXa8CWch0G0yJU'
-coze_token = 'pat_ld7mlri4FoEzPzGQ79C9O4kdrxAIuZLAKmo7pRLQy6G6Kn1k1S0qPS5MtrNh12hs'
+coze_token = 'pat_LmguDGfwwRwmI15UTQbGCBEhOmu0bjXSlms3jNq6I90Njy5Aur7K7UbN8EHyjKCS'
