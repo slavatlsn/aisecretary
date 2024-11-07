@@ -7,6 +7,7 @@ from os import remove
 from docx2pdf import convert
 from speech_recognition import Recognizer, WavFile
 from audio_extract import extract_audio
+from pypdf import PdfReader
 
 
 bot = telebot.TeleBot(t)
@@ -14,7 +15,8 @@ coze = Coze(auth=TokenAuth(c))
 states = dict()
 r = Recognizer()
 
-
+# !!!  Сделай папки docx_data, jpg_data, mp3_data, oga_data, pdf_data, png_fata, wav_data
+# в каждой папке будут храниться файлы нужного типа данных
 
 @bot.message_handler(content_types=['text', 'document', 'audio', 'voice', 'photo'])
 def starting_messages(message):
@@ -90,7 +92,7 @@ def starting_messages(message):
             ext = s[s.rfind('.') + 1:]
             print(ext)
             file = bot.download_file(states[message.from_user.id][2][4:])
-            f_name = str(message.from_user.id) + '.' + ext
+            f_name = f'{ext}_data/' + str(message.from_user.id) + '.' + ext
             with open(f_name, 'wb') as new:
                 new.write(file)
             new.close()
@@ -98,7 +100,12 @@ def starting_messages(message):
                 f = coze.files.upload(file)
                 chat_poll = coze.chat.create_and_poll(bot_id='7433847972913643525', user_id='0', additional_messages=[Message.build_user_question_objects([MessageObjectString.build_file(f.id)])])
             elif(ext == 'pdf'):
-                pass
+                reader = PdfReader(f_name)
+                kol_pages = len(reader.pages)
+                for i in range(0, kol_pages):
+                    page = reader.pages[0]
+                    text = page.extract_text()
+                    states[message.from_user.id][2] += '\n' + text
                 #текст в pdf
             elif (ext == 'docx'):
                 doc = Document(f_name)
@@ -106,6 +113,7 @@ def starting_messages(message):
                 for para in doc.paragraphs:
                     fullText.append(para.text)
                 states[message.from_user.id][2] = '\n'.join(fullText)
+                print(states[message.from_user.id][2])
                 # текст в docx
             elif ext in {'oga', 'mp3', 'wav'}:
                 f_name_new = str(message.from_user.id) + '.wav'
@@ -121,6 +129,7 @@ def starting_messages(message):
                 #Speech recognition
             else:
                 chat_poll = []
+
         if (states[message.from_user.id][2][:4] != 'f_pt'):
             print('send text to ai')
             chat_poll = coze.chat.create_and_poll(bot_id='7433847972913643525', user_id='0', additional_messages=[Message.build_user_question_text('Сократи текст: ' + states[message.from_user.id][2])])
